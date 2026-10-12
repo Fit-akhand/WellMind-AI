@@ -1,0 +1,16 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Build output
+dist/
+
+# Node modules
+node_modules/
+
+# Python AI service artifacts
+ai_service/index/
+ai_service/__pycache__/
+*.pyc

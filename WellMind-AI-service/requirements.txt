@@ -1,0 +1,17 @@
+# WellMind AI - Python AI Service
+# Phase 3B Step 1: RAG foundation only. No LLM provider configured.
+# Core web framework
+flask
+flask-cors
+
+# Data processing
+pandas
+numpy
+
+# RAG embeddings + retrieval
+sentence-transformers
+faiss-cpu
+scikit-learn
+
+# torch is a dependency of sentence-transformers (CPU wheels by default)
+torch
