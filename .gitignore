@@ -2,7 +2,7 @@
 .env
 .env.local
 .env.*.local
-server/.env
+WellMind-Server/.env
 
 # Build output
 dist/
@@ -11,6 +11,6 @@ dist/
 node_modules/
 
 # Python AI service artifacts
-ai_service/index/
-ai_service/__pycache__/
+WellMind-AI-service/index/
+WellMind-AI-service/__pycache__/
 *.pyc

@@ -7,6 +7,7 @@ import moodRoutes from "./routes/moodTracker.js";
 import chatbotRoutes from "./routes/chatbotRoutes.js";
 import connectDB from "./config/db.js";
 import errorHandler from "./middleware/errorHandler.js";
+import rateLimit from "./middleware/rateLimit.js";
 import surveyRoutes from "./routes/surveyRoutes.js";
 import { seedSurveys } from "./config/seedSurveys.js";
 import { requestHealth } from "./lib/aiClient.js";
@@ -48,9 +49,21 @@ app.get("/health", async (_req, res) => {
   });
 });
 
+// Only credential-guessing routes are limited; the session check (/me) runs on every page load.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: "Too many sign-in attempts. Please wait a few minutes and try again.",
+});
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/mood", moodRoutes);
-app.use("/api/chat", chatbotRoutes);
+app.use(
+  "/api/chat",
+  rateLimit({ windowMs: 60 * 1000, max: 20, message: "You are sending messages very quickly. Please pause for a moment." }),
+  chatbotRoutes
+);
 app.use("/api/surveys", surveyRoutes);
 
 await connectDB();

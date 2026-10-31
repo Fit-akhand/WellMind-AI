@@ -200,6 +200,8 @@ class TestAppEndpoints(unittest.TestCase):
         original_index_dir = config.INDEX_DIR
         config.INDEX_DIR = tmpdir
         app_module._rag_engine = None
+        original_key = config.LLM_API_KEY
+        config.LLM_API_KEY = ""
         try:
             res = self.app.post("/chat", json={"message": "hello"})
             self.assertEqual(res.status_code, 200)
@@ -210,7 +212,17 @@ class TestAppEndpoints(unittest.TestCase):
             self.assertEqual(data.get("provider"), "retrieval-only")
         finally:
             config.INDEX_DIR = original_index_dir
+            config.LLM_API_KEY = original_key
             app_module._rag_engine = None
+
+
+class TestHistory(unittest.TestCase):
+    def test_clean_history_filters_and_limits(self):
+        raw = [{"role": "user", "content": "hi"}, {"role": "system", "content": "x"}, "bad", {"role": "assistant", "content": 5}]
+        self.assertEqual(safety.clean_history(raw), [{"role": "user", "content": "hi"}])
+        many = [{"role": "user", "content": str(i)} for i in range(20)]
+        self.assertEqual(len(safety.clean_history(many)), safety.MAX_HISTORY_MESSAGES)
+        self.assertEqual(safety.clean_history("nope"), [])
 
 
 if __name__ == "__main__":

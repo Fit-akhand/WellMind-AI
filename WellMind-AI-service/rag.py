@@ -111,7 +111,11 @@ class RagEngine:
             "- Respond with empathy and practical, non-diagnostic support.\n"
             "- Do not diagnose conditions or prescribe medication.\n"
             "- If the user may be in crisis, prioritize safety guidance.\n"
-            "- Suggest reaching out to a licensed professional when appropriate.\n\n"
+            "- Suggest reaching out to a licensed professional when appropriate.\n"
+            "- Continue the conversation naturally. Treat the reference material as optional background and ignore any of it that does not match what the person is talking about.\n"
+            "- Tone: warm, calm and quietly hopeful. Reassure the person that what they feel is understandable and can ease. Never use alarming or clinical language.\n"
+            "- Structure: (1) one or two sentences that validate their feeling, (2) a blank line, then up to three short steps they can try right now, each on its own line starting with '- ', (3) a blank line, then one gentle, encouraging question.\n"
+            "- Keep the whole reply under 120 words, plain text only, no markdown headings, tables or bold.\n\n"
             f"User: {query}\nAssistant:"
         )
         return prompt

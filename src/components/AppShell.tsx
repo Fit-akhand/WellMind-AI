@@ -11,8 +11,8 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <radialGradient id="bg-grad" cx="30%" cy="30%" r="70%">
-              <stop offset="0%" stopColor="#efeaf7" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#f7f6f3" stopOpacity="1" />
+              <stop offset="0%" style={{ stopColor: "var(--color-lavender-soft)" }} stopOpacity="0.8" />
+              <stop offset="100%" style={{ stopColor: "var(--color-bg)" }} stopOpacity="1" />
             </radialGradient>
           </defs>
           <rect width="100%" height="100%" fill="url(#bg-grad)" />

@@ -46,3 +46,24 @@ test("local window does not invent entries outside the range", () => {
   );
   assert.equal(rows.length, 2);
 });
+
+test("daily insight reflects saved check-ins and never invents data", async () => {
+  const { dailyInsight, heatmapDays } = await import("../src/lib/insights.ts");
+  const now = new Date(2026, 9, 28, 12);
+  const yesterday = new Date(2026, 9, 27, 12);
+
+  assert.equal(dailyInsight([], now).tone, "neutral");
+  assert.equal(
+    dailyInsight([{ mood: "sad", date: now }, { mood: "verySad", date: yesterday }], now).tone,
+    "gentle"
+  );
+  assert.equal(
+    dailyInsight([{ mood: "happy", date: now }, { mood: "sad", date: yesterday }], now).tone,
+    "positive"
+  );
+
+  const days = heatmapDays([{ mood: "happy", date: now }], 30, now);
+  assert.equal(days.length, 30);
+  assert.equal(days[29].average, 4);
+  assert.equal(days[0].average, null);
+});

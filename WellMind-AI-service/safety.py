@@ -26,16 +26,19 @@ CRISIS_PATTERNS = [
     r"\bbetter off without me\b",
     r"\bcan'?t go on\b",
     r"\boverdose\b",
+    r"\b(don'?t|do not) want to (be here|live|exist|wake up)\b",
+    r"\bwish i (was|were) (dead|never born)\b",
+    r"\b(take|taking|end) my (own )?life\b",
+    r"\bnot worth living\b",
 ]
 
 # Geographic scope is stated explicitly. Hours and eligibility vary.
 # International users should use a local directory rather than a US number.
 CRISIS_RESOURCES = [
-    "If you are in immediate danger, contact local emergency services now. Emergency numbers differ by country (for example 911 in the US, 999 in the UK, 112 in many countries including India).",
-    "United States and territories: 988 Suicide & Crisis Lifeline — call or text 988, or visit https://988lifeline.org. This number is for the US.",
-    "United Kingdom and Republic of Ireland: Samaritans — call 116 123 or visit https://www.samaritans.org. In the UK, call 999 if you are in immediate danger. NHS 111 is urgent medical advice, not an emergency number.",
-    "India: Tele-MANAS — call 14416 or 1-800-891-4416 (Ministry of Health and Family Welfare). KIRAN mental health rehabilitation helpline — 1800-599-0019 (Department of Empowerment of Persons with Disabilities).",
-    "Find a local helpline (international): IASP directory at https://www.iasp.info/suicidalthoughts/",
+    "India (24/7 National): Tele-MANAS — call 14416 or 1-800-891-4416 (Toll-free). KIRAN mental health helpline — 1800-599-0019. National Emergency — dial 112.",
+    "United States: 988 Suicide & Crisis Lifeline — call or text 988, or visit https://988lifeline.org.",
+    "United Kingdom and Ireland: Samaritans — call 116 123.",
+    "International Directory: IASP directory at https://www.iasp.info/suicidalthoughts/",
 ]
 
 SUPPORT_DISCLAIMER = (
@@ -99,3 +102,24 @@ def validate_message(text: str):
 def sanitize(text: str) -> str:
     """Trim and collapse whitespace without altering meaning."""
     return re.sub(r"\s+", " ", (text or "").strip())
+
+
+MAX_HISTORY_MESSAGES = 6
+
+
+def clean_history(raw):
+    """Keep only well-formed recent turns: [{role: user|assistant, content: str}]."""
+    if not isinstance(raw, list):
+        return []
+    cleaned = []
+    for item in raw[-MAX_HISTORY_MESSAGES:]:
+        if not isinstance(item, dict):
+            continue
+        role = item.get("role")
+        content = item.get("content")
+        if role not in ("user", "assistant") or not isinstance(content, str):
+            continue
+        content = sanitize(content)[:MAX_MESSAGE_LENGTH]
+        if content:
+            cleaned.append({"role": role, "content": content})
+    return cleaned

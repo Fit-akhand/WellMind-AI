@@ -11,6 +11,8 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  X,
+  ArrowUpRight,
 } from 'lucide-react';
 import { Bar, Line } from 'react-chartjs-2';
 import {
@@ -63,9 +65,73 @@ const moodBadgeStyles: Record<MoodKey, string> = {
   verySad: 'bg-coral-soft text-coral',
 };
 
-const MoodTracker: React.FC = () => {
+interface MoodMotivation {
+  emoji: string;
+  badge: string;
+  title: string;
+  message: string;
+  tip: string;
+  buttonText: string;
+  accentBg: string;
+}
+
+const MOOD_MOTIVATIONS: Record<MoodKey, MoodMotivation> = {
+  veryHappy: {
+    emoji: '🥰✨🎉',
+    badge: 'Feeling Wonderful',
+    title: 'Your light is shining today!',
+    message: 'It is so heartwarming to see you feeling joyful and radiant! Celebrate your efforts, big or small. Soak in this good energy—you worked hard and you deserve it!',
+    tip: '💡 Tip: Note down one thing that made you smile today in your journal, or share a kind word with a friend.',
+    buttonText: 'Keep Shining! 💛',
+    accentBg: 'bg-lavender-soft text-lavender-deep',
+  },
+  happy: {
+    emoji: '☀️🌱😊',
+    badge: 'Feeling Good',
+    title: 'Keep that gentle glow!',
+    message: 'Steady, peaceful days build true resilience. You are doing so much better than you give yourself credit for. Be proud of the progress you are making every single day.',
+    tip: '💡 Tip: Take a slow, refreshing breath and remind yourself: "I am growing at my own right pace."',
+    buttonText: 'Thank you, feeling good! 🌿',
+    accentBg: 'bg-sage-soft text-sage',
+  },
+  neutral: {
+    emoji: '🕊️🌿😌',
+    badge: 'Steady & Centered',
+    title: 'Balanced days are beautiful days.',
+    message: 'Not every day needs to be intense or high energy. An okay, steady day is a sign of peace and equilibrium. You are showing up for yourself, and that matters.',
+    tip: '💡 Tip: Stay well-hydrated, take a brief stretch, and do one tiny thing you enjoy tonight.',
+    buttonText: 'Staying grounded 🤍',
+    accentBg: 'bg-surface-2 text-ink',
+  },
+  sad: {
+    emoji: '🌧️🫂💙',
+    badge: 'Sending Warmth',
+    title: 'It is okay to have a low day.',
+    message: 'You are so brave for being honest with your feelings. Remember: tough moments and cloudy days do not define your worth or your future. Please be extra kind and gentle with yourself right now.',
+    tip: '💡 Tip: Wrap yourself in warmth, sip some water, and remember you do not have to carry everything alone.',
+    buttonText: 'Thank you for this 🫂',
+    accentBg: 'bg-mist-soft text-mist',
+  },
+  verySad: {
+    emoji: '🌸🛡️💜',
+    badge: 'You Are Safe',
+    title: 'Take a deep breath. You are not alone.',
+    message: 'When placement pressure or life feels overwhelming, please pause. You do NOT have to solve your whole future right this second. You only have to take care of this one breath right now.',
+    tip: '💡 Tip: Place a hand gently on your heart, take three slow exhales, and remember: this heavy feeling will pass.',
+    buttonText: 'Taking it one breath at a time 🌸',
+    accentBg: 'bg-coral-soft text-coral',
+  },
+};
+
+interface MoodTrackerProps {
+  /** Show log, insights and history one after another instead of behind tabs. */
+  stacked?: boolean;
+}
+
+const MoodTracker: React.FC<MoodTrackerProps> = ({ stacked = false }) => {
   const [note, setNote] = useState('');
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>(null);
+  const [activeMotivation, setActiveMotivation] = useState<MoodMotivation | null>(null);
   const { addMoodEntry, moodEntries, getMoodStats, loadError } = useMood();
   const [activeTab, setActiveTab] = useState<'entry' | 'history' | 'stats'>('entry');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,17 +141,21 @@ const MoodTracker: React.FC = () => {
     e.preventDefault();
     if (!selectedMood || isSubmitting) return;
 
+    const chosenMood = selectedMood;
+    if (MOOD_MOTIVATIONS[chosenMood]) {
+      setActiveMotivation(MOOD_MOTIVATIONS[chosenMood]);
+    }
     setIsSubmitting(true);
     setSubmitError('');
     try {
       await addMoodEntry({
         date: new Date(),
-        mood: selectedMood,
+        mood: chosenMood,
         note,
       });
       setSelectedMood(null);
       setNote('');
-      setActiveTab('history');
+      if (!stacked) setActiveTab('history');
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'The mood entry could not be saved.');
     } finally {
@@ -94,6 +164,7 @@ const MoodTracker: React.FC = () => {
   };
 
   const { moodCounts, recentTrend } = getMoodStats();
+  const show = (tab: 'entry' | 'history' | 'stats') => stacked || activeTab === tab;
 
   const barChartData = {
     labels: (Object.keys(moodLabels) as MoodKey[]).map((k) => moodLabels[k]),
@@ -105,7 +176,7 @@ const MoodTracker: React.FC = () => {
           key === 'verySad' || key === 'sad' ? 'rgba(217, 127, 106, 0.45)' : key === 'neutral' ? 'rgba(107, 139, 164, 0.4)' : 'rgba(95, 138, 118, 0.45)'
         ),
         borderColor: (Object.keys(moodLabels) as MoodKey[]).map((key) =>
-          key === 'verySad' || key === 'sad' ? '#d97f6a' : key === 'neutral' ? '#6b8ba4' : '#5f8a76'
+          key === 'verySad' || key === 'sad' ? '#e8845f' : key === 'neutral' ? '#4f9bc4' : '#5aa874'
         ),
         borderWidth: 1.5,
         borderRadius: 8,
@@ -132,11 +203,11 @@ const MoodTracker: React.FC = () => {
         label: 'Mood Trend',
         data: recentEntries.map((entry) => moodValues[String(entry.mood)] || 3),
         fill: false,
-        borderColor: '#7c6fae',
-        backgroundColor: '#7c6fae',
+        borderColor: '#3f9c93',
+        backgroundColor: '#3f9c93',
         tension: 0.3,
         pointRadius: 4,
-        pointBackgroundColor: '#7c6fae',
+        pointBackgroundColor: '#3f9c93',
       },
     ],
   };
@@ -173,6 +244,56 @@ const MoodTracker: React.FC = () => {
 
   return (
     <div className="card rounded-2xl p-6 sm:p-8">
+      {/* Motivational Praise Modal */}
+      {activeMotivation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-md card rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-4 border border-line bg-surface">
+            <button
+              type="button"
+              onClick={() => setActiveMotivation(null)}
+              className="absolute top-4 right-4 p-1.5 rounded-full text-ink-mute hover:text-ink hover:bg-surface-2 transition-colors"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {/* Cute Emoji & Badge */}
+            <div className="mx-auto w-auto px-4 py-2 rounded-2xl bg-surface-2 flex items-center justify-center text-3xl shadow-inner tracking-widest">
+              {activeMotivation.emoji}
+            </div>
+
+            <div className="space-y-1">
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${activeMotivation.accentBg}`}>
+                {activeMotivation.badge}
+              </span>
+              <h3 className="font-display text-2xl font-bold text-ink mt-2">
+                {activeMotivation.title}
+              </h3>
+            </div>
+
+            <p className="text-sm text-ink-soft leading-relaxed px-1">
+              {activeMotivation.message}
+            </p>
+
+            <div className="p-3.5 rounded-2xl bg-surface-2/60 text-xs text-ink-mute text-left border border-line/60">
+              <p className="leading-relaxed">{activeMotivation.tip}</p>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveMotivation(null)}
+                className="btn-primary w-full !py-2.5 text-sm"
+              >
+                {activeMotivation.buttonText}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!stacked && (
+        <>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-line">
         <div>
@@ -202,9 +323,12 @@ const MoodTracker: React.FC = () => {
         </div>
       </div>
 
+        </>
+      )}
+
       {/* Tab: Log Mood */}
-      {activeTab === 'entry' && (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+      {show('entry') && (
+        <form onSubmit={handleSubmit} className={`space-y-6 ${stacked ? '' : 'mt-6'}`}>
           <div>
             <label className="block text-sm font-medium text-ink mb-3">
               How are you feeling right now?
@@ -272,8 +396,8 @@ const MoodTracker: React.FC = () => {
       )}
 
       {/* Tab: History */}
-      {activeTab === 'history' && (
-        <div className="mt-6">
+      {show('history') && (
+        <div className={stacked ? 'mt-8 pt-8 border-t border-line' : 'mt-6'}>
           <div className="flex items-center gap-2 mb-4 text-ink-mute">
             <Calendar className="h-4 w-4" />
             <h3 className="text-xs font-semibold uppercase tracking-wider">
@@ -327,8 +451,8 @@ const MoodTracker: React.FC = () => {
       )}
 
       {/* Tab: Stats */}
-      {activeTab === 'stats' && (
-        <div className="mt-6 space-y-6">
+      {show('stats') && (
+        <div className={`space-y-6 ${stacked ? 'mt-8 pt-8 border-t border-line' : 'mt-6'}`}>
           <div className="flex items-center gap-2 text-ink">
             {recentTrend === 'improving' ? (
               <TrendingUp className="h-5 w-5 text-sage" />

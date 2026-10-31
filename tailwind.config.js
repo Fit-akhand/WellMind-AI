@@ -28,6 +28,10 @@ export default {
           DEFAULT: 'var(--color-coral)',
           soft: 'var(--color-coral-soft)',
         },
+        sun: {
+          DEFAULT: 'var(--color-sun)',
+          soft: 'var(--color-sun-soft)',
+        },
         line: 'var(--color-line)',
       },
       fontFamily: {

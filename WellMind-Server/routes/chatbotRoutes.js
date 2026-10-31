@@ -25,7 +25,17 @@ router.post("/", authMiddleware, async (req, res, next) => {
     }
 
     const trimmed = message.trim().slice(0, 2000);
-    const ai = await requestChat(trimmed);
+    const recent = await Chatbot.find({ userId: req.user }).sort({ timestamp: -1 }).limit(3).lean();
+    const history = recent
+      .reverse()
+      .flatMap((entry) => [
+        { role: "user", content: entry.message },
+        // Skip canned "generation not configured" notices; they carry no conversational content.
+        ...(entry.response.startsWith("Thanks for sharing. I retrieved")
+          ? []
+          : [{ role: "assistant", content: entry.response }]),
+      ]);
+    const ai = await requestChat(trimmed, history);
     const responseText =
       typeof ai.response === "string" && ai.response.trim()
         ? ai.response

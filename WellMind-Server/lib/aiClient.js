@@ -9,7 +9,7 @@ export class AiServiceError extends Error {
   }
 }
 
-export async function requestChat(message) {
+export async function requestChat(message, history = []) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
@@ -17,7 +17,7 @@ export async function requestChat(message) {
     const res = await fetch(`${AI_SERVICE_URL}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, history }),
       signal: controller.signal,
     });
 

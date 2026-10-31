@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 interface SignupFormProps {
   onBackToLogin?: () => void;
@@ -12,6 +12,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onBackToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -129,13 +131,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ onBackToLogin }) => {
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-ink-mute pointer-events-none" />
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input !pl-9"
+              className="input !pl-9 !pr-10"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 p-1 text-ink-mute hover:text-ink transition-colors focus:outline-none"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 
@@ -146,13 +156,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ onBackToLogin }) => {
           <div className="relative">
             <Lock className="absolute left-3 top-3 h-4 w-4 text-ink-mute pointer-events-none" />
             <input
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="input !pl-9"
+              className="input !pl-9 !pr-10"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-2.5 p-1 text-ink-mute hover:text-ink transition-colors focus:outline-none"
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 

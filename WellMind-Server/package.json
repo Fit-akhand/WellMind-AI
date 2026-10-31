@@ -2,10 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "node tests/authMiddleware.test.js && node tests/chatAuth.test.js && node tests/moodAndSurvey.test.js"
+    "start": "node server.js",
+    "test": "node tests/authMiddleware.test.js && node tests/chatAuth.test.js && node tests/moodAndSurvey.test.js && node tests/rateLimit.test.js"
   },
   "keywords": [],
   "author": "",

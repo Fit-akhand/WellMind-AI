@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { safeReturnPath } from '../lib/safeReturnPath';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import SignupForm from './SignupForm';
 
 interface LoginFormProps {
@@ -16,6 +16,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSignupInternal, setShowSignupInternal] = useState(false);
@@ -98,14 +99,22 @@ const LoginForm: React.FC<LoginFormProps> = ({
             <Lock className="absolute left-3 top-3 h-4 w-4 text-ink-mute pointer-events-none" />
             <input
               id="login-password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input !pl-9"
+              className="input !pl-9 !pr-10"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 p-1 text-ink-mute hover:text-ink transition-colors focus:outline-none"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 
