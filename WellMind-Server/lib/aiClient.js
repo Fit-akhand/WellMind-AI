@@ -1,4 +1,4 @@
-const AI_SERVICE_URL = (process.env.AI_SERVICE_URL || "http://localhost:5001").replace(/\/$/, "");
+const DEFAULT_AI_SERVICE_URL = "http://localhost:5001";
 const TIMEOUT_MS = Number(process.env.AI_SERVICE_TIMEOUT_MS || 25000);
 
 export class AiServiceError extends Error {
@@ -9,12 +9,17 @@ export class AiServiceError extends Error {
   }
 }
 
+function getAiServiceUrl(endpoint) {
+  const base = (process.env.AI_SERVICE_URL || DEFAULT_AI_SERVICE_URL).replace(/\/+$/, "");
+  return new URL(`${base}/${endpoint.replace(/^\/+/, "")}`);
+}
+
 export async function requestChat(message, history = []) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const res = await fetch(`${AI_SERVICE_URL}/chat`, {
+    const res = await fetch(getAiServiceUrl("chat"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, history }),
@@ -43,7 +48,7 @@ export async function requestChat(message, history = []) {
 
 export async function requestHealth() {
   try {
-    const res = await fetch(`${AI_SERVICE_URL}/health`, { signal: AbortSignal.timeout(4000) });
+    const res = await fetch(getAiServiceUrl("health"), { signal: AbortSignal.timeout(4000) });
     if (!res.ok) return { reachable: false };
     const data = await res.json().catch(() => ({}));
     return { reachable: true, ...data };

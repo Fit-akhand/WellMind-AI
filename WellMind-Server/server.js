@@ -30,7 +30,12 @@ const allowedOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:5173")
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || process.env.VERCEL || origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
@@ -71,5 +76,9 @@ await seedSurveys();
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5002;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5002;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+export default app;
